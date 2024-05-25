@@ -560,6 +560,11 @@ module.exports = function (webpackEnv) {
             // Make sure to add the new loader(s) before the "file" loader.
           ],
         },
+        {
+          test: /\.worker\.(js|ts)$/,
+          use: { loader: 'worker-loader' },
+          exclude: /node_modules/,
+        },
       ].filter(Boolean),
     },
     plugins: [
