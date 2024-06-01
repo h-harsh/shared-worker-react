@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import  { useEffect, useState, useRef } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [message, setMessage] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
+  const workerRef = useRef<SharedWorker | null>(null);
+
+  useEffect(() => {
+    // Check if the browser supports Shared Workers
+    if (typeof SharedWorker !== 'undefined') {
+      workerRef.current = new SharedWorker(new URL('./sharedWorker.js', import.meta.url), { type: 'module' });
+
+      workerRef.current.port.addEventListener('message', (event: MessageEvent) => {
+        setResponse(event.data);
+      });
+
+      workerRef.current.port.start();
+
+      // Send a message to the Shared Worker
+      workerRef.current.port.postMessage('Hello, Shared Worker!');
+    } else {
+      console.warn('Shared Workers are not supported in this browser.');
+    }
+
+    // Clean up the worker on component unmount
+    return () => {
+      workerRef.current?.port.close();
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (workerRef.current) {
+      workerRef.current.port.postMessage(message);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Shared Worker Example</h1>
+      <input 
+        type="text" 
+        value={message} 
+        onChange={(e) => setMessage(e.target.value)} 
+        placeholder="Type a message" 
+      />
+      <button onClick={sendMessage}>Send Message</button>
+      <p>Response from Worker: {response}</p>
+    </div>
+  );
 }
 
-export default App
+export default App;
