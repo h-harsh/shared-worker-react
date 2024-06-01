@@ -1,12 +1,12 @@
 // @ts-nocheck
 /* eslint-disable */
-let connections: MessagePort[] = [];
-
-self.onconnect = (event: MessageEvent) => {
+let connections = [];
+console.log("harsh")
+self.onconnect = (event) => {
     const port = event.ports[0];
     connections.push(port);
 
-    port.onmessage = (event: MessageEvent) => {
+    port.onmessage = (event) => {
         // Handle messages sent to the worker
         connections.forEach(conn => conn.postMessage(event.data));
     };

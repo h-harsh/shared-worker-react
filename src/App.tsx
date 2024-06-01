@@ -1,5 +1,5 @@
 // src/App.tsx
-
+// @ts-nocheck
 import React, { useEffect, useRef } from 'react';
 import SharedWorkerLoader from './workers/workerLoader';
 
@@ -7,7 +7,8 @@ const App: React.FC = () => {
     const workerRef = useRef<SharedWorker | null>(null);
 
     useEffect(() => {
-        workerRef.current = SharedWorkerLoader(new URL('./workers/sharedWorker.ts', import.meta.url).toString());
+        // workerRef.current = SharedWorkerLoader(new URL('./workers/sharedWorker.ts', import.meta.url).toString());
+        workerRef.current = SharedWorkerLoader(new URL('/public/sharedWorker.js', import.meta.url));
         workerRef.current.port.start();
 
         workerRef.current.port.onmessage = (event: MessageEvent) => {
